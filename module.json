@@ -1,0 +1,49 @@
+{
+	"singleton": false,
+	"dependencies": [],
+	"category": "automation",
+	"author": "Jens Troest",
+	"homepage": "http://razberry.z-wave.me",
+	"icon": "",
+	"version": "1.0.0",
+	"maturity": "stable",
+	"repository": {
+		"type": "git",
+		"source": "https://github.com/Z-Wave-Me/home-automation"
+	},
+	"defaults": {
+		"title": "Niffler",
+		"description": "Some switches do not send reports when pressed manually. As a workaround some manufacturers send a NodeInfoFrame instead. This module will utilize that workaround by updating the switch status when a NIF is received",
+	    "sourceDevices": []
+	},
+	"schema": {
+		"type": "object",
+		"properties": {
+			"sourceDevices": {
+				"type": "array",
+				"items": {
+					"field": "enum",
+					"datasource": "namespaces",
+					"enum": "namespaces:devices_switchControl:deviceId,namespaces:devices_switchBinary:deviceId,namespaces:devices_switchMultilevel:deviceId",
+					"required": true
+				}
+			}
+		},
+		"required": false
+	},
+	"options": {
+		"fields": {
+			"sourceDevices": {
+				"label": "List of switches to niffle",
+				"fields": {
+					"item": {
+						"type": "select",
+						"datasource": "namespaces",
+						"field": "optionLabels",
+						"optionLabels": "namespaces:devices_switchControl:deviceName,namespaces:devices_switchBinary:deviceName,namespaces:devices_switchMultilevel:deviceName"
+					}
+				}
+			}
+		}
+	}
+}
