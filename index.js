@@ -1,7 +1,7 @@
   /*** Niffler ZAutomation module ****************************************
 
 Version: 1.0.0
-(c) Z-Wave.Me, 2013
+(c) Jens Troest, 2015
 
 -------------------------------------------------------------------------------
 Author: Jens Troest
@@ -21,106 +21,90 @@ function Niffler (id, controller) {
 
 inherits(Niffler, AutomationModule);
 
+//Static declations
 _module = Niffler;
-
-Niffler.isStarted = false;
-Niffler.niffledDevices;
+Niffler.binderMethods;
 // ----------------------------------------------------------------------------
 // --- Module instance initialized
 // ----------------------------------------------------------------------------
 
 Niffler.prototype.init = function (config) {
-    // Call superclass' init (this will process config argument and so on)
     Niffler.super_.prototype.init.call(this, config);
 
     var self = this;
-    console.log("JENS init");
+    this.binderMethods = [];//Hold methods used to bind
+    console.log("Niffler: init");
 
-    this.niffledDevices =  this.config.sourceDevices;
-    console.log("JENS niffledDevices ", this.niffledDevices.length);
-
+    //The boot sequence of ZWay is not well defined.
+    //This method is used to detect device creation on boot and niffle any device on the list
     this.deviceCreated = function (vDev) {
-	var deviceId = self.getDeviceIndex(vDev.id);
-	if(null === deviceId) return;
-	console.log("JENS deviceID:",deviceId);
-	self.niffleDevice(vDev.id, deviceId);
-	self.isStarted = true;
+	self.niffleDevice(vDev.id);
     };
-    
+    //Register for events
     this.controller.devices.on("created", this.deviceCreated);
-    console.log("JENS isStarted", this.isStarted);
-//    if(this.isStarted) {
-    console.log("JENS just do it");
+
+    //Niffle all listed devices on each start, this will handle restarts after boot
     this.config.sourceDevices.forEach(function(dev) {
-    	var index = self.getDeviceIndex(dev);
-    	if(index != null) {
-    	    self.niffleDevice(dev, index);
-    	}
+    	self.niffleDevice(dev);
     });
-//	}
-
-	//Update niffles a change has occured
- //   }
-
 };
 
-Niffler.prototype.start = function () {
-    console.log("JENS start() ");
-    Niffler.super_.prototype.start.call(this);
-};
 Niffler.prototype.stop = function () {
 
-    console.log("JENS stop() called");
-    if(this.niffledDevices.length) {
-	console.log("JENS niffledDevices before ", this.niffledDevices.length);
-	this.unNiffle(this.niffledDevices);
-	this.niffledDevices =  this.config.sourceDevices;
-	console.log("JENS niffledDevices after ", this.niffledDevices.length);
+    console.log("Niffler: stop() called");
+    //Unnifle any niffled devices
+    if(this.config.sourceDevices.length) {
+	this.unNiffle(this.config.sourceDevices);
+	this.binderMethods = [];
     }
-    
+    //Unregister for device creation
     this.controller.off("ZWave.register", this.deviceCreated);
     Niffler.super_.prototype.stop.call(this);
 };
-
-// Niffler.prototype.saveConfig = function (config) {
-//     console.log("Niffler saveConfig() called");
-
-//     Niffler.super_.prototype.saveConfig.call(config);
-// }
 
 // ----------------------------------------------------------------------------
 // --- Module methods
 // ----------------------------------------------------------------------------
 
-Niffler.prototype.binder = function(type) {
-    if (type == 0x41 /* Updated | PhantomUpdate */)
-	zway.devices[deviceId].Basic.Get();
-};
+//Do the actual niffle on the physical device
 Niffler.prototype.niffle = function(index) {
-    var binderMethod =  function(type) {
-    if (type == 0x41 /* Updated | PhantomUpdate */)
-	zway.devices[index].Basic.Get();
-    };
-    zway.devices[index].data.nodeInfoFrame.bind(binderMethod);
+
+    if ( !isNaN(index) ) {
+	var binderMethod =  function(type) {
+	    if (type == 0x41 /* Updated | PhantomUpdate */)
+		zway.devices[index].Basic.Get();
+	};
+	this.binderMethods.push( [index,binderMethod] );//Add method to array for later unbind
+	zway.devices[index].data.nodeInfoFrame.bind(binderMethod);
+    }
 };
 
 Niffler.prototype.unNiffle = function(UNList) {
     var self = this;
     if(UNList.length)
     {
-	console.log("JENS: unNiffling existing devices");
+	console.log("Niffler:: unNiffling existing devices");
 	UNList.forEach(function(dev) {
 	    var index = self.getDeviceIndex(dev);
-	    console.log("JENS: unNiffling ", dev);
-	    zway.devices[index].data.nodeInfoFrame.unbind(this.binderMethod);	    
-	}
-		      );
+	    var unBinder = null;
+	    for(n=0; n<self.binderMethods.length; n++) {
+		if(self.binderMethods[n][0] === index) {
+		    unBinder = self.binderMethods[n][1];
+		    break;
+		}
+	    }
+	    console.log("Niffler:: unNiffling ", dev);
+	    if (!isNaN(index) ) {
+		zway.devices[index].data.nodeInfoFrame.unbind(unBinder);	    
+	    }
+	});
     }
 };
 
+//Retrieve the index of the physical device. null if not found
 Niffler.prototype.getDeviceIndex = function(vdevid) {
 	var str = vdevid;
-	console.log("JENS getdeviceindex: ", str);
+	console.log("Niffler: getdeviceindex: ", str);
 
 	var res = str.split("_");
 	if(res.length != 3 && str[0] != "ZWayVDev")
@@ -128,32 +112,24 @@ Niffler.prototype.getDeviceIndex = function(vdevid) {
 	return res[2].split("-")[0];
 };
 
-Niffler.prototype.niffleDevice = function(vdevid, index) {
-    	if (global.ZWave && !isNaN(index) ) {
-            for (var name in global.ZWave) {
-		var realDevices = global.ZWave[name].zway.devices;
-//		console.log("JENS controller is named ", name.toString());
-//		console.log("JENS has devices: ", realDevices.length);
-		
-		var sdev;
-		this.config.sourceDevices.forEach(function(adev) {
-//		    console.log("JENS sDev: ", adev);
-//		    console.log("JENS vdev: ", vdevid);
-		    if(adev === vdevid) {
-			sdev = adev;
-			return;
-		    }
-		});
-		if(sdev) {
-		    console.log("JENS sDev: ", sdev);
-		    console.log("JENS vDev: ", vdevid);
-		    if(vdevid === sdev) {//Is this device in our source list?
-			//Niffle this device
-			console.log("JENS: Niffling device ",vdevid," at index ",index);
-			this.niffle(index);
-		    }
-		}
+//Niffle a device if it is in the source list.
+//vdevid is the virtual device id and index is the physical device location
+Niffler.prototype.niffleDevice = function(vdevid) {
 
-            }
+    var index = this.getDeviceIndex(vdevid);
+    if(null === index) return;
+
+    var sdev;
+    //Should this device be niffled? Look for it in the source list
+    this.config.sourceDevices.forEach(function(adev) {
+	if(adev === vdevid) {
+	    sdev = adev;
+	    return;
 	}
+    });
+    if(sdev) {//We have a match
+	//Niffle this device
+	console.log("Niffler:: Niffling device ",vdevid," at index ",index);
+	this.niffle(index);
+    }
 };
