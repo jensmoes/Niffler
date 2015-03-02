@@ -69,7 +69,7 @@ Niffler.prototype.stop = function () {
 //Do the actual niffle on the physical device
 Niffler.prototype.niffle = function(index) {
 
-    if ( !isNaN(index) ) {
+    if ( global.ZWave && !isNaN(index) ) {
 	var binderMethod =  function(type) {
 	    if (type == 0x41 /* Updated | PhantomUpdate */)
 		zway.devices[index].Basic.Get();
@@ -94,7 +94,7 @@ Niffler.prototype.unNiffle = function(UNList) {
 		}
 	    }
 	    console.log("Niffler:: unNiffling ", dev);
-	    if (!isNaN(index) ) {
+	    if (global.ZWave && !isNaN(index) ) {
 		zway.devices[index].data.nodeInfoFrame.unbind(unBinder);	    
 	    }
 	});
