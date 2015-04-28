@@ -12,9 +12,9 @@
 		"source": "https://github.com/jensmoes/Niffler"
 	},
 	"defaults": {
-		"title": "Niffler",
-		"description": "Some switches do not send reports when pressed manually. As a workaround some manufacturers send a NodeInfoFrame instead. This module will utilize that workaround by updating the switch status when a NIF is received",
-	    "sourceDevices": []
+                "title": "Niffler",
+                "description": "Some devices do not send reports when used manually. This module will update the device status in the UI when this happens",
+                "sourceDevices": []
 	},
 	"schema": {
 		"type": "object",
@@ -24,7 +24,7 @@
 				"items": {
 					"field": "enum",
 					"datasource": "namespaces",
-					"enum": "namespaces:devices_switchControl:deviceId,namespaces:devices_switchBinary:deviceId,namespaces:devices_switchMultilevel:deviceId",
+					"enum": "namespaces:devices_switchControl:deviceId,namespaces:devices_switchBinary:deviceId,namespaces:devices_switchMultilevel:deviceId,namespaces:devices_doorlock:deviceId",
 					"required": true
 				}
 			}
@@ -34,13 +34,14 @@
 	"options": {
 		"fields": {
 			"sourceDevices": {
-				"label": "List of switches to niffle",
+				"label": "List of devices to niffle",
+                                "helper": "For switches sending out NIF or door locks sending out alarm events",
 				"fields": {
 					"item": {
 						"type": "select",
 						"datasource": "namespaces",
 						"field": "optionLabels",
-						"optionLabels": "namespaces:devices_switchControl:deviceName,namespaces:devices_switchBinary:deviceName,namespaces:devices_switchMultilevel:deviceName"
+						"optionLabels": "namespaces:devices_switchControl:deviceName,namespaces:devices_switchBinary:deviceName,namespaces:devices_switchMultilevel:deviceName,namespaces:devices_doorlock:deviceName"
 					}
 				}
 			}
