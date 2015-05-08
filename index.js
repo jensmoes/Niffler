@@ -1,4 +1,6 @@
-  /*** Niffler ZAutomation module ****************************************
+  /* global global, zway */
+
+/*** Niffler ZAutomation module ****************************************
 
 Version: 1.0.0
 (c) Jens Troest, 2015
@@ -110,7 +112,7 @@ Niffler.prototype.unNiffle = function(UNList) {
 		}
 	    }
 	    console.log("Niffler: unNiffling ", vDevId);
-	    if (global.ZWave && !isNaN(index) ) {
+	    if (global.ZWave && !isNaN(index) && unBinder !== null ) {
                 if(this.controller.devices.get(vDevId).get('deviceType') === 'doorlock') {
                     console.log("Niffler: unNiffling doorlock");
                     zway.devices[index].Alarm.data[6].unbind(unBinder);
