@@ -5,6 +5,6 @@ Some switches such as the GE/Jasco and Leviton does not send a command when pres
 
 This module binds the NodeInfoFrame to a Basic.Get() command class.
 
-Put the folder in the automation/modules or userModules directory and restart your Z-Way server:
+Put the files in a folder named Niffler in the automation/modules or userModules directory and restart your Z-Way server:
 sudo /etc/init.d/z-way-server restart
 
