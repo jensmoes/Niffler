@@ -7,4 +7,5 @@ This module binds the NodeInfoFrame to a Basic.Get() command class.
 
 Put the files in a folder named Niffler in the automation/modules or userModules directory and restart your Z-Way server:
 sudo /etc/init.d/z-way-server restart
+Then add the devices you wish to Niffle to the module/app from the UI.
 
