@@ -12,8 +12,8 @@
 		"source": "https://github.com/jensmoes/Niffler"
 	},
 	"defaults": {
-                "title": "Niffler",
-                "description": "Some devices do not send reports when used manually. This module will update the device status in the UI when this happens",
+                "title": "__m_title__",
+                "description": "__m_descr__",
                 "sourceDevices": []
 	},
 	"schema": {
@@ -34,8 +34,8 @@
 	"options": {
 		"fields": {
 			"sourceDevices": {
-				"label": "List of devices to niffle",
-                                "helper": "For switches sending out NIF or door locks sending out alarm events",
+				"label": "__l_sourceDevices__",
+                                "helper": "__h_sourceDevices__",
 				"fields": {
 					"item": {
 						"type": "select",
