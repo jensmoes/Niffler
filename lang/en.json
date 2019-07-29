@@ -1,0 +1,6 @@
+{
+    "m_title": "Niffler",
+    "m_descr": "Some devices do not send reports when used manually. This module will update the device status in the UI when this happens",
+    "l_sourceDevices": "List of devices to niffle",
+    "h_sourceDevices": "For switches sending out NIF or door locks sending out alarm events"
+}
