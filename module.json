@@ -5,7 +5,8 @@
 	"author": "Jens Troest",
 	"homepage": "https://github.com/jensmoes/Niffler",
 	"icon": "",
-	"version": "1.0.1",
+	"moduleName": "Niffler",
+	"version": "1.0.2",
 	"maturity": "stable",
 	"repository": {
 		"type": "git",
