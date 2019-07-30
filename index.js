@@ -78,10 +78,10 @@ Niffler.prototype.stop = function () {
 Niffler.prototype.niffle = function(virtualDevice) {
 
     var index = this.getDeviceIndex(virtualDevice.id);
-    if ( global.ZWave && !isNaN(index) ) {
+    if (global.ZWave && !isNaN(index) && zway && zway.devices[index]) {
 	var binderMethod;
         var deviceType = virtualDevice.get('deviceType');
-        if(deviceType === 'doorlock'){
+        if(deviceType === 'doorlock' && zway.devices[index].Alarm){
             binderMethod = function(type) {
                    console.log("Niffler","doorlock alarm event");
                    zway.devices[index].DoorLock.Get(); //This call will poll and update the zway UI. Useful since most alarms are lock/unlock events
@@ -113,8 +113,9 @@ Niffler.prototype.unNiffle = function(UNList) {
 		}
 	    }
 	    console.log("Niffler: unNiffling ", vDevId);
-	    if (global.ZWave && !isNaN(index) && unBinder !== null ) {
-                if(this.controller.devices.get(vDevId).get('deviceType') === 'doorlock') {
+	    if (global.ZWave && !isNaN(index) && unBinder !== null && zway && zway.devices[index]) {
+	        var vdev = this.controller.devices.get(vDevId);
+                if(vdev && vdev.get('deviceType') === 'doorlock' && zway.devices[index].Alarm) {
                     console.log("Niffler: unNiffling doorlock");
                     zway.devices[index].Alarm.data.V1event && zway.devices[index].Alarm.data.V1event.unbind(unBinder);
                     zway.devices[index].Alarm.data[6] && zway.devices[index].Alarm.data[6].unbind(unBinder);
